@@ -6,13 +6,20 @@ import (
 	"log"
 )
 
-var Config = viper.New()
+type Dot map[string]string
+type Dots []Dot
+
+var Config Dots
 
 func ReadConfig() {
-	Config.SetConfigName("conf")
-	Config.AddConfigPath(".")
-	err := Config.ReadInConfig()
-	if err != nil {
+	viper.SetConfigName("conf")
+	viper.AddConfigPath(".")
+	if err := viper.ReadInConfig(); err != nil {
 		log.Panic(fmt.Errorf("Unable to read conf file %v", err))
+
+	}
+
+	if err := viper.UnmarshalKey("dots", &Config); err != nil {
+		log.Panic(fmt.Errorf("Unable to unmarshal conf file %v", err))
 	}
 }
