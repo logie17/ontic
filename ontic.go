@@ -18,6 +18,15 @@ var (
 		Usage:  "Downloads all dot files form repos specified in conf file",
 		Action: update,
 	}
+
+	backupCommand = cli.Command{
+		Name:   "backup",
+		Usage:  "Backs dot files to the directory",
+		Action: backup,
+	}
+
+	homeDir = os.Getenv("HOME")
+	rootDir = os.Getenv(homeDir + "/.ontic")
 )
 
 func main() {
@@ -27,7 +36,7 @@ func main() {
 	app.Name = "ontic"
 	app.Usage = "install update"
 	//app.Version = build.Info().String()
-	app.Commands = []cli.Command{installCommand, updateCommand}
+	app.Commands = []cli.Command{installCommand, updateCommand, backupCommand}
 
 	err := app.Run(os.Args)
 	if err != nil {
