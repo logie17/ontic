@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 )
 
 func update(c *cli.Context) error {
@@ -17,6 +18,10 @@ func update(c *cli.Context) error {
 
 	for _, repo := range repos {
 		path := deducePath(repo)
+		if matched, err := regexp.MatchString("^/", path); err == nil && !matched {
+			path = rootDir + "/" + path
+		}
+
 		updatedPaths = append(updatedPaths, updateRepo(path, repo))
 	}
 

@@ -49,6 +49,6 @@ func backup(c *cli.Context) error {
 	}
 
 	spinner.Stop()
-	fmt.Printf("\033[31mBacked up %d dot files to %s\n", count, backUpDir)
+	fmt.Printf("\033[31mBacked up %d dot files to %s\033[m\n", count, backUpDir)
 	return nil
 }

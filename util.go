@@ -17,6 +17,9 @@ func allFiles() map[string]string {
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			log.Fatalf("The path exists but is not a git repo %v", err)
 		} else {
+			if matched, err := regexp.MatchString("^/", path); err == nil && !matched {
+				path = rootDir + "/" + path
+			}
 			cmd := fmt.Sprintf("cd %s; find -L . -type f", path)
 			output, err := exec.Command("/bin/sh", "-c", cmd).Output()
 			if err != nil {
@@ -51,4 +54,24 @@ func allFiles() map[string]string {
 	}
 
 	return allFiles
+}
+
+func upToDate(src, dst, method string) bool {
+	srcFi, srcFiErr := os.Stat(src)
+	dstFi, _ := os.Stat(dst)
+
+	if os.IsNotExist(srcFiErr) {
+		panic("The file does not exist! " + src)
+	}
+
+	if srcFi.Size() != dstFi.Size() {
+		return false
+	}
+
+	if method == "symlink" {
+		linkdst, _ := os.Readlink(dst)
+		return linkdst == src
+	}
+	// TODO: Need to determine how to handle non symlinks
+	return false
 }
