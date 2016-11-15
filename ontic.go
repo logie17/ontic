@@ -26,7 +26,7 @@ var (
 	}
 
 	homeDir = os.Getenv("HOME")
-	rootDir = os.Getenv(homeDir + "/.ontic")
+	rootDir = homeDir + "/.ontic"
 )
 
 func main() {
