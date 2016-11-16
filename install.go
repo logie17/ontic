@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	cli "gopkg.in/urfave/cli.v1"
+	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -48,7 +49,55 @@ func install(c *cli.Context) error {
 
 	}
 
+	if method == "symlink" {
+		watchDirs := []string{"bin", ".zsh", ".bash", ".vim", ".sh"}
+		existingDirs := []string{}
+
+		fmt.Println("Checking for bad symlinks")
+
+		for _, dir := range watchDirs {
+			fullDir := homeDir + "/" + dir
+			if s, statErr := os.Stat(fullDir); statErr == nil && s.IsDir() {
+				existingDirs = append(existingDirs, fullDir)
+			}
+
+		}
+
+		badSyms := findDeadSyms(existingDirs)
+		if len(badSyms) == 0 {
+			fmt.Println("No bad symlinks found")
+		} else {
+			for _, badSym := range badSyms {
+				// Check err here?
+				os.Remove(badSym)
+				fmt.Printf("Removing bad link %s\n", badSym)
+			}
+		}
+
+	}
+
 	spinner.Stop()
 
 	return nil
+}
+
+// Todo write a unit test for this
+func findDeadSyms(dirs []string) []string {
+	reaped := []string{}
+	for _, dir := range dirs {
+		files, _ := ioutil.ReadDir(dir)
+		for _, file := range files {
+			path := dir + "/" + file.Name()
+			fi, _ := os.Lstat(path)
+			s, sErr := os.Stat(path)
+			if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
+				if os.IsNotExist(sErr) {
+					reaped = append(reaped, path)
+				}
+			} else if sErr == nil && s.IsDir() {
+				reaped = append(reaped, findDeadSyms([]string{path})...)
+			}
+		}
+	}
+	return reaped
 }
