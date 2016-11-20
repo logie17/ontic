@@ -38,7 +38,6 @@ func update(c *cli.Context) error {
 func updateRepo(path string, repo Dot) string {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if v, ok := repo["repo"]; ok {
-
 			cmdArgs := []string{
 				"clone", "--depth", "1", "--recursive", v, path,
 			}
