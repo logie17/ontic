@@ -14,8 +14,9 @@ func allFiles() map[string]string {
 	allFiles := map[string]string{}
 	for _, repo := range repos {
 		path := repo["path"]
+		path = rootDir + "/" + path
 		if _, err := os.Stat(path); os.IsNotExist(err) {
-			log.Fatalf("The path exists but is not a git repo %v", err)
+			log.Fatalf("The path exists but is not a git repo [%s] %v", path, err)
 		} else {
 			if matched, err := regexp.MatchString("^/", path); err == nil && !matched {
 				path = rootDir + "/" + path
