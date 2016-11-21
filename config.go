@@ -13,6 +13,7 @@ var Config Dots
 
 func ReadConfig() {
 	viper.SetConfigName("conf")
+	viper.AddConfigPath(rootDir)
 	viper.AddConfigPath(".")
 	if err := viper.ReadInConfig(); err != nil {
 		log.Panic(fmt.Errorf("Unable to read conf file %v", err))
