@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	scriptPath        = rootDir + "/scripts"
+	scriptPath        = rootDir + "/lib"
 	onticShellGitPath = "https://github.com/logie17/ontic-shell"
 )
 
