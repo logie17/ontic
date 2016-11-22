@@ -10,6 +10,8 @@ import (
 )
 
 func allFiles() map[string]string {
+	ReadConfig()
+
 	repos := Config
 	allFiles := map[string]string{}
 	for _, repo := range repos {

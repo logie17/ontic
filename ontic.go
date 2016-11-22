@@ -36,7 +36,6 @@ var (
 )
 
 func main() {
-	ReadConfig()
 	app := cli.NewApp()
 
 	app.Name = "ontic"
