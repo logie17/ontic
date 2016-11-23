@@ -46,6 +46,7 @@ func allFiles() map[string]string {
 		for _, file := range files {
 			file = re.ReplaceAllString(file, "")
 			if matched, err := regexp.MatchString("^(?:\\.|bin/)", file); err == nil && matched {
+
 				if matched, err := regexp.MatchString("(\\.sw.|~)$", file); err != nil || matched {
 					continue
 				}
@@ -59,7 +60,10 @@ func allFiles() map[string]string {
 					continue
 				}
 
-				allFiles[file] = path
+				// On conflicts we keep the previously found dot file
+				if _, ok := allFiles[file]; !ok {
+					allFiles[file] = path
+				}
 			}
 		}
 
@@ -70,10 +74,19 @@ func allFiles() map[string]string {
 
 func upToDate(src, dst, method string) bool {
 	srcFi, srcFiErr := os.Stat(src)
-	dstFi, _ := os.Stat(dst)
+	dstFi, dstFiErr := os.Stat(dst)
 
 	if os.IsNotExist(srcFiErr) {
-		panic("The file does not exist! " + src)
+		log.Panicf("The file does not exist! " + src)
+	}
+
+	if srcFiErr != nil {
+		log.Panicf("There was a problem statting src file %s %v ", src, srcFiErr)
+	}
+
+	if dstFiErr != nil {
+		log.Printf("There was a problem statting dst file %s %v ", dst, dstFiErr)
+		return false
 	}
 
 	if srcFi.Size() != dstFi.Size() {
