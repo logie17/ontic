@@ -31,6 +31,12 @@ var (
 		Action: initOntic,
 	}
 
+	envCommand = cli.Command{
+		Name:   "env",
+		Usage:  "Prints out important env variables for ontic to work",
+		Action: env,
+	}
+
 	homeDir = os.Getenv("HOME")
 	rootDir = homeDir + "/.ontic"
 )
@@ -46,6 +52,7 @@ func main() {
 		updateCommand,
 		backupCommand,
 		initCommand,
+		envCommand,
 	}
 
 	err := app.Run(os.Args)
