@@ -7,8 +7,8 @@ import (
 )
 
 func env(c *cli.Context) error {
-	fmt.Printf("export DOTDOTDOT_ROOT=%s\n", rootDir)
-	fmt.Printf("export DOTDOTDOT_ORDER=%s\n", strings.Join(allPaths(), " "))
+	fmt.Printf("export DOTDOTDOT_ROOT='%s';\n", rootDir)
+	fmt.Printf("export DOTDOTDOT_ORDER='%s';\n", strings.Join(allPaths(), " "))
 
 	return nil
 }
