@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-func allFiles() map[string]string {
+func allPaths() []string {
 	ReadConfig()
 
 	repos := Config
-	allFiles := map[string]string{}
+	paths := []string{}
 	for _, repo := range repos {
 		path := repo["path"]
 		path = rootDir + "/" + path
@@ -23,35 +23,44 @@ func allFiles() map[string]string {
 			if matched, err := regexp.MatchString("^/", path); err == nil && !matched {
 				path = rootDir + "/" + path
 			}
-			cmd := fmt.Sprintf("cd %s; find -L . -type f", path)
-			output, err := exec.Command("/bin/sh", "-c", cmd).Output()
-			if err != nil {
-				log.Fatalf("Unable to run the %s %v", cmd, err)
-			}
+			paths = append(paths, path)
+		}
+	}
+	return paths
+}
 
-			files := strings.Split(string(output), "\n")
-			re := regexp.MustCompile("^./")
+func allFiles() map[string]string {
+	allFiles := map[string]string{}
+	paths := allPaths()
 
-			for _, file := range files {
-				file = re.ReplaceAllString(file, "")
-				if matched, err := regexp.MatchString("^(?:\\.|bin/)", file); err == nil && matched {
-					if matched, err := regexp.MatchString("(\\.sw.|~)$", file); err != nil || matched {
-						continue
-					}
-					if matched, err := regexp.MatchString("\\.git/", file); err != nil || matched {
-						continue
-					}
-					if matched, err := regexp.MatchString("\\.(git|gitignore|gitmodules?)$", file); err != nil || matched {
-						continue
-					}
-					if matched, err := regexp.MatchString("^\\.\\.\\.(Makefile|deps)", file); err != nil || matched {
-						continue
-					}
+	for _, path := range paths {
+		cmd := fmt.Sprintf("cd %s; find -L . -type f", path)
+		output, err := exec.Command("/bin/sh", "-c", cmd).Output()
+		if err != nil {
+			log.Fatalf("Unable to run the %s %v", cmd, err)
+		}
 
-					allFiles[file] = path
+		files := strings.Split(string(output), "\n")
+		re := regexp.MustCompile("^./")
+
+		for _, file := range files {
+			file = re.ReplaceAllString(file, "")
+			if matched, err := regexp.MatchString("^(?:\\.|bin/)", file); err == nil && matched {
+				if matched, err := regexp.MatchString("(\\.sw.|~)$", file); err != nil || matched {
+					continue
 				}
-			}
+				if matched, err := regexp.MatchString("\\.git/", file); err != nil || matched {
+					continue
+				}
+				if matched, err := regexp.MatchString("\\.(git|gitignore|gitmodules?)$", file); err != nil || matched {
+					continue
+				}
+				if matched, err := regexp.MatchString("^\\.\\.\\.(Makefile|deps)", file); err != nil || matched {
+					continue
+				}
 
+				allFiles[file] = path
+			}
 		}
 
 	}
