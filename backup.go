@@ -31,11 +31,15 @@ func backup(c *cli.Context) error {
 
 	f, err := os.Create(backUpListFile)
 	if err != nil {
-		panic(err)
+		log.Panicf("Unable to create backup list file %s %v", backUpListFile, err)
 	}
 
 	count := 0
 	for file := range files {
+		if _, sErr := os.Stat(homeDir + "/" + file); os.IsNotExist(sErr) {
+			continue
+		}
+
 		f.WriteString(file + "\n")
 		fmt.Printf("%v\n", file)
 		count++
@@ -45,7 +49,7 @@ func backup(c *cli.Context) error {
 	cmd := fmt.Sprintf("cd %s; cat %s | cpio -dump %s", homeDir, backUpListFile, backUpDir)
 	_, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
 	if cmdErr != nil {
-		log.Fatal(cmdErr)
+		log.Panicf("Unable to backup files with cmd: %s %v", cmd, cmdErr)
 	}
 
 	spinner.Stop()
