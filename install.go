@@ -6,10 +6,17 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"regexp"
+	"os/exec"
+	"path/filepath"
 )
 
-var defaultMethod = "symlink"
+type method int
+const (
+	hardlink method = iota
+	symlink
+)
+
+var defaultMethod = symlink
 
 func install(c *cli.Context) error {
 	spinner := NewSpinner("Installing dot files...").Start()
@@ -21,7 +28,6 @@ func install(c *cli.Context) error {
 
 	count := 0
 	skipCount := 0
-	re := regexp.MustCompile("(\\.*/)\\.*")
 
 	for file, path := range files {
 		src := path + "/" + file
@@ -31,15 +37,20 @@ func install(c *cli.Context) error {
 			continue
 		}
 		count++
-		dir := re.ReplaceAllString(dst, "$1")
+		dir := filepath.Dir(dst)
 		if _, statErr := os.Stat(dir); statErr != nil {
 			os.MkdirAll(dir, os.ModePerm)
 		}
 
-		fmt.Printf("Removing %v\n", dst)
 		os.Remove(dst)
 
-		if method == "symlink" {
+		if method == hardlink {
+			cmd := fmt.Sprintf("cp -f %s %s", src, dst)
+			_, err := exec.Command("/bin/sh", "-c", cmd).Output()
+			if err != nil {
+				log.Fatalf("Unable to run the %s %v", cmd, err)
+			}
+		} else if method == symlink {
 			if err := os.Symlink(src, dst); err != nil {
 				log.Panicf("Unable create symlink! %v\n", err)
 			}
@@ -49,11 +60,9 @@ func install(c *cli.Context) error {
 
 	}
 
-	if method == "symlink" {
+	if method == symlink {
 		watchDirs := []string{"bin", ".zsh", ".bash", ".vim", ".sh"}
 		existingDirs := []string{}
-
-		fmt.Println("Checking for bad symlinks")
 
 		for _, dir := range watchDirs {
 			fullDir := homeDir + "/" + dir

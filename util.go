@@ -72,7 +72,7 @@ func allFiles() map[string]string {
 	return allFiles
 }
 
-func upToDate(src, dst, method string) bool {
+func upToDate(src, dst string, method method) bool {
 	srcFi, srcFiErr := os.Stat(src)
 	dstFi, dstFiErr := os.Stat(dst)
 
@@ -93,10 +93,10 @@ func upToDate(src, dst, method string) bool {
 		return false
 	}
 
-	if method == "symlink" {
+	if method == symlink {
 		linkdst, _ := os.Readlink(dst)
 		return linkdst == src
 	}
-	// TODO: Need to determine how to handle non symlinks
-	return false
+
+	return true
 }

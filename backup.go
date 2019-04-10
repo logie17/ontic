@@ -36,12 +36,17 @@ func backup(c *cli.Context) error {
 
 	count := 0
 	for file := range files {
-		if _, sErr := os.Stat(homeDir + "/" + file); os.IsNotExist(sErr) {
+		_, sErr := os.Stat(homeDir + "/" + file)
+		if os.IsNotExist(sErr) {
+			continue
+		}
+
+		if sErr != nil {
+			fmt.Printf("Unexpected error %v\n", sErr)
 			continue
 		}
 
 		f.WriteString(file + "\n")
-		fmt.Printf("%v\n", file)
 		count++
 	}
 	f.Close()
