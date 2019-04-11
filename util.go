@@ -81,7 +81,8 @@ func upToDate(src, dst string, method method) bool {
 	}
 
 	if srcFiErr != nil {
-		log.Panicf("There was a problem statting src file %s %v ", src, srcFiErr)
+		log.Printf("There was a problem statting src file %s %v ", src, srcFiErr)
+		return false
 	}
 
 	if dstFiErr != nil {
