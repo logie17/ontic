@@ -16,7 +16,7 @@ const (
 	symlink
 )
 
-var defaultMethod = symlink
+var defaultMethod = hardlink
 
 func install(c *cli.Context) error {
 	spinner := NewSpinner("Installing dot files...").Start()
